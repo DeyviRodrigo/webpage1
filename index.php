@@ -1,12 +1,19 @@
 <?php
 require_once("adm/script/conex.php");
 
+$currentPage = 'inicio';
+
 // Obtener banners activos
-$cn = new MySQLcn();
-$sql = "SELECT Titulo, Describir, Enlace, Imagen FROM banner WHERE estado = 1 ORDER BY fecha DESC";
-$cn->Query($sql);
-$banners = $cn->Rows();
-$cn->Close();
+$banners = [];
+try {
+    $cn = new MySQLcn();
+    $sql = "SELECT Titulo, Describir, Enlace, Imagen FROM banner WHERE estado = 1 ORDER BY fecha DESC";
+    $cn->Query($sql);
+    $banners = $cn->Rows();
+    $cn->Close();
+} catch (Throwable $e) {
+    $banners = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -34,23 +41,23 @@ $cn->Close();
     <!-- Navigation Menu -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#inicio">DAITEC &amp; TrazMAPE</a>
+            <a class="navbar-brand" href="index.php">DAITEC &amp; TrazMAPE</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#inicio">Inicio</a>
+                        <a class="nav-link <?php echo $currentPage === 'inicio' ? 'active' : ''; ?>" href="index.php">Inicio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#noticias">Noticias</a>
+                        <a class="nav-link <?php echo $currentPage === 'noticias' ? 'active' : ''; ?>" href="noticias.php">Noticias</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#servicios">Servicios</a>
+                        <a class="nav-link <?php echo $currentPage === 'servicios' ? 'active' : ''; ?>" href="servicios.php">Servicios</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#contacto">Contacto</a>
+                        <a class="nav-link <?php echo $currentPage === 'contacto' ? 'active' : ''; ?>" href="contacto.php">Contacto</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="adm/index.php">Iniciar Sesión</a>
@@ -90,7 +97,7 @@ $cn->Close();
                 <?php endforeach; ?>
             <?php else: ?>
                 <div class="carousel-item active">
-                    <img src="images/banner/default.jpg" class="d-block w-100" alt="Banner por defecto">
+                    <img src="images/news/news_1.png" class="d-block w-100" alt="Banner por defecto">
                     <div class="carousel-caption">
                         <h3>Impulsando la Pequeña Minería Responsable</h3>
                         <p>DAITEC y TrazMAPE articulan soluciones digitales para la formalización minera en el Perú.</p>
@@ -123,8 +130,8 @@ $cn->Close();
                         <h1 class="display-5 fw-bold mb-4">Tecnología y trazabilidad para una pequeña minería sostenible</h1>
                         <p class="lead text-secondary">La Dirección de Asistencia Técnica para la Formalización (DAITEC) del Ministerio de Energía y Minas impulsa iniciativas que fortalecen la pequeña minería y la minería artesanal. Con TrazMAPE, la plataforma de trazabilidad para materiales auríferos, acompañamos a las organizaciones mineras en su transición hacia operaciones responsables, sostenibles y competitivas.</p>
                         <div class="d-flex flex-wrap gap-3 mt-4">
-                            <a href="#servicios" class="btn btn-primary">Conoce nuestros servicios</a>
-                            <a href="#noticias" class="btn btn-outline-light border-0" style="background: rgba(148, 163, 184, 0.12);">Últimas novedades</a>
+                            <a href="servicios.php" class="btn btn-primary">Conoce nuestros servicios</a>
+                            <a href="noticias.php" class="btn btn-outline-light">Últimas novedades</a>
                         </div>
                     </div>
                 </div>
@@ -145,135 +152,77 @@ $cn->Close();
         </div>
     </section>
 
-    <!-- News Section -->
-    <section id="noticias" class="news-section">
+    <section class="page-section quick-links">
         <div class="container">
-            <h2 class="section-heading">Noticias <span>Destacadas</span></h2>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="images/news/news_1.png" class="card-img-top" alt="Implementación de TrazMAPE">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">TrazMAPE llega a nuevas regiones</h5>
-                            <p class="card-text">Equipos de DAITEC capacitan a cooperativas de pequeña minería en Madre de Dios, Ayacucho y La Libertad para registrar operaciones y dar seguimiento responsable al oro.</p>
-                            <a href="#contacto" class="btn btn-primary mt-auto">Solicitar información</a>
-                        </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 d-flex flex-column">
+                        <i class="fas fa-newspaper"></i>
+                        <h4 class="text-white">Noticias y alertas</h4>
+                        <p>Entérate de los avances de la formalización, despliegues de TrazMAPE y convocatorias regionales para la pequeña minería responsable.</p>
+                        <a href="noticias.php" class="btn btn-primary">Ver noticias</a>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="images/news/news_2.jpg" class="card-img-top" alt="Innovación tecnológica">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">Innovación para la formalización</h5>
-                            <p class="card-text">El laboratorio de innovación de DAITEC impulsa pilotos de sensores ambientales y control de producción, integrados con la plataforma TrazMAPE para mejorar la transparencia.</p>
-                            <a href="#servicios" class="btn btn-primary mt-auto">Ver programas</a>
-                        </div>
+                <div class="col-md-4">
+                    <div class="card h-100 d-flex flex-column">
+                        <i class="fas fa-tools"></i>
+                        <h4 class="text-white">Servicios especializados</h4>
+                        <p>Capacitaciones, soporte técnico y articulación territorial diseñados por DAITEC para fortalecer operaciones mineras sostenibles.</p>
+                        <a href="servicios.php" class="btn btn-primary">Explorar servicios</a>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="images/news/news_3.jpg" class="card-img-top" alt="Pequeña minería responsable">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">Pequeña minería con enfoque social</h5>
-                            <p class="card-text">Más de 2,000 mineros artesanales reciben asistencia técnica en salud ocupacional, cierre de pasivos y comercialización justa gracias a alianzas público-privadas lideradas por DAITEC.</p>
-                            <a href="#contacto" class="btn btn-primary mt-auto">Únete como aliado</a>
-                        </div>
+                <div class="col-md-4">
+                    <div class="card h-100 d-flex flex-column">
+                        <i class="fas fa-comments"></i>
+                        <h4 class="text-white">Conecta con nosotros</h4>
+                        <p>Agenda reuniones, solicita asistencia y descubre cómo integrarte a las cadenas de valor responsables que impulsa DAITEC.</p>
+                        <a href="contacto.php" class="btn btn-primary">Ir a contacto</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Servicios Section -->
-    <section id="servicios">
+    <section class="page-section pt-0">
         <div class="container">
-            <h2 class="section-heading">Servicios para la <span>Pequeña Minería</span></h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="service-card h-100">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        <h4 class="text-white">Capacitaciones especializadas</h4>
-                        <p class="text-secondary">Diseñamos programas de formación en seguridad minera, gestión ambiental y trazabilidad digital para titulares y cooperativas.</p>
-                        <ul class="text-secondary list-unstyled mb-0">
-                            <li><i class="fas fa-check text-info me-2"></i>Talleres presenciales y virtuales</li>
-                            <li><i class="fas fa-check text-info me-2"></i>Certificación por competencias</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="service-card h-100">
-                        <i class="fas fa-network-wired"></i>
-                        <h4 class="text-white">Gestión con TrazMAPE</h4>
-                        <p class="text-secondary">Implementamos la plataforma nacional de trazabilidad para asegurar origen responsable, control de inventarios y reportes en tiempo real.</p>
-                        <ul class="text-secondary list-unstyled mb-0">
-                            <li><i class="fas fa-check text-info me-2"></i>Integración con cadenas de suministro</li>
-                            <li><i class="fas fa-check text-info me-2"></i>Soporte técnico 24/7</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="service-card h-100">
-                        <i class="fas fa-handshake"></i>
-                        <h4 class="text-white">Articulación territorial</h4>
-                        <p class="text-secondary">Coordinamos con gobiernos regionales, gremios mineros y aliados internacionales para impulsar proyectos de formalización y acceso a mercados.</p>
-                        <ul class="text-secondary list-unstyled mb-0">
-                            <li><i class="fas fa-check text-info me-2"></i>Mesas de diálogo multiactor</li>
-                            <li><i class="fas fa-check text-info me-2"></i>Planificación participativa</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contacto Section -->
-    <section id="contacto">
-        <div class="container">
-            <h2 class="section-heading">Conversemos sobre <span>Formalización</span></h2>
-            <div class="row g-4">
+            <div class="row align-items-center g-5">
                 <div class="col-lg-6">
-                    <div class="contact-card h-100">
-                        <h4>Oficina de Asistencia Técnica</h4>
-                        <p class="text-secondary">Nuestro equipo está listo para acompañar a organizaciones mineras, gobiernos regionales y aliados estratégicos.</p>
-                        <div class="contact-detail">
-                            <i class="fas fa-envelope"></i>
-                            <span>contacto@daitec.gob.pe</span>
-                        </div>
-                        <div class="contact-detail">
-                            <i class="fas fa-phone"></i>
-                            <span>+51 1 123 4567</span>
-                        </div>
-                        <div class="contact-detail">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Av. De la Minería 150, Lima, Perú</span>
-                        </div>
-                        <div class="contact-social mt-4">
-                            <a href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <div class="service-detail h-100">
+                        <span class="breadcrumb-custom mb-3">DAITEC en acción</span>
+                        <h2>Formalización minera con impacto territorial</h2>
+                        <p>Guiamos a la pequeña minería y minería artesanal del Perú hacia la sostenibilidad. Nuestros equipos despliegan TrazMAPE para asegurar trazabilidad del oro, fortalecen la seguridad ocupacional y articulan proyectos con aliados estratégicos.</p>
+                        <ul>
+                            <li>Acompañamiento personalizado a cooperativas y unidades productivas.</li>
+                            <li>Monitoreo ambiental y social integrado a plataformas digitales.</li>
+                            <li>Enlaces con mercados responsables y programas de financiamiento.</li>
+                        </ul>
+                        <div class="tag-list">
+                            <span>Pequeña Minería</span>
+                            <span>Trazabilidad</span>
+                            <span>Innovación Pública</span>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h4 class="card-title">Agenda una reunión</h4>
-                            <p class="card-text text-secondary">Cuéntanos sobre tus operaciones o iniciativas para la pequeña minería y coordinemos una sesión de trabajo.</p>
-                            <form>
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Nombre y organización</label>
-                                    <input type="text" class="form-control" id="name" placeholder="Ej. Cooperativa Minera Andina">
+                            <h4 class="card-title text-white">Resultados recientes</h4>
+                            <p class="card-text text-secondary">Más de 2,000 mineros capacitados en los últimos 12 meses, 15 oficinas regionales integradas a TrazMAPE y nuevas rutas comerciales para oro responsable.</p>
+                            <div class="d-flex flex-column gap-3 mt-4">
+                                <div>
+                                    <span class="text-secondary">Cobertura TrazMAPE</span>
+                                    <div class="progress" style="height: 10px; background: rgba(148, 163, 184, 0.15);">
+                                        <div class="progress-bar" role="progressbar" style="width: 78%; background: var(--accent);"></div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Correo electrónico</label>
-                                    <input type="email" class="form-control" id="email" placeholder="nombre@organizacion.pe">
+                                <div>
+                                    <span class="text-secondary">Cooperativas acompañadas</span>
+                                    <div class="progress" style="height: 10px; background: rgba(148, 163, 184, 0.15);">
+                                        <div class="progress-bar" role="progressbar" style="width: 64%; background: var(--accent-strong);"></div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="message" class="form-label">Interés específico</label>
-                                    <textarea class="form-control" id="message" rows="4" placeholder="Implementar TrazMAPE, capacitación, articulación..."></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Enviar mensaje</button>
-                            </form>
+                            </div>
+                            <a href="noticias.php" class="btn btn-outline-light mt-4">Conocer casos de éxito</a>
                         </div>
                     </div>
                 </div>

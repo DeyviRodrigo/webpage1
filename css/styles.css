@@ -1,19 +1,29 @@
 :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #111827;
-    --bg-elevated: rgba(30, 41, 59, 0.85);
+    --bg-base: #020617;
+    --bg-primary: #020617;
+    --bg-secondary: #0b1120;
+    --bg-elevated: rgba(15, 23, 42, 0.92);
+    --bg-muted: rgba(15, 23, 42, 0.75);
     --accent: #38bdf8;
     --accent-strong: #0ea5e9;
     --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
-    --card-border: rgba(148, 163, 184, 0.2);
+    --text-muted: #64748b;
+    --card-border: rgba(148, 163, 184, 0.18);
+    --shadow-lg: 0 30px 60px rgba(2, 6, 23, 0.55);
+    --shadow-md: 0 18px 35px rgba(2, 6, 23, 0.45);
+}
+
+html, body {
+    background-color: var(--bg-base);
 }
 
 body {
-    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 45%),
-                linear-gradient(160deg, #0f172a 0%, #020617 100%);
+    background-image: radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 45%),
+                      linear-gradient(160deg, #020617 0%, #000 100%);
     color: var(--text-primary);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
 }
 
 a {
@@ -26,7 +36,7 @@ a:hover {
 
 /* Navigation styles */
 .navbar {
-    background: rgba(15, 23, 42, 0.85) !important;
+    background: rgba(2, 6, 23, 0.85) !important;
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--card-border);
 }
@@ -60,7 +70,7 @@ a:hover {
 }
 
 .carousel-caption {
-    background: rgba(2, 6, 23, 0.65);
+    background: rgba(2, 6, 23, 0.7);
     padding: 30px;
     border-radius: 16px;
     border: 1px solid var(--card-border);
@@ -103,11 +113,11 @@ section::before {
 }
 
 .hero-content {
-    background: rgba(15, 23, 42, 0.75);
+    background: var(--bg-elevated);
     border-radius: 20px;
     padding: 40px;
     border: 1px solid var(--card-border);
-    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+    box-shadow: var(--shadow-lg);
 }
 
 .hero-badges span {
@@ -135,7 +145,7 @@ section::before {
     background: var(--bg-secondary);
     border: 1px solid var(--card-border);
     border-radius: 18px;
-    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+    box-shadow: var(--shadow-md);
     overflow: hidden;
     transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
 }
@@ -174,11 +184,25 @@ section::before {
     transform: translateY(-2px);
 }
 
+.btn-outline-light {
+    color: var(--text-primary);
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    background: rgba(148, 163, 184, 0.12);
+    border-radius: 999px;
+    transition: background 0.3s ease, transform 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-light:hover {
+    background: rgba(148, 163, 184, 0.25);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
 /* Servicios */
 .service-card {
     height: 100%;
     padding: 30px;
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--bg-muted);
     border: 1px solid var(--card-border);
     border-radius: 18px;
     transition: transform 0.4s ease, border-color 0.4s ease;
@@ -197,7 +221,7 @@ section::before {
 
 /* Contacto */
 .contact-card {
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--bg-muted);
     border: 1px solid var(--card-border);
     border-radius: 18px;
     padding: 35px;
@@ -242,13 +266,247 @@ section::before {
 /* Footer styles */
 footer {
     margin-top: 40px;
-    background: rgba(2, 6, 23, 0.9);
+    background: rgba(2, 6, 23, 0.95);
     border-top: 1px solid var(--card-border);
     color: var(--text-secondary);
 }
 
 footer a {
     color: var(--accent);
+}
+
+/* Form styles */
+.form-control,
+.form-select {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: var(--text-primary);
+    border-radius: 14px;
+    padding: 12px 16px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(15, 23, 42, 0.92);
+    color: var(--text-primary);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+label {
+    color: var(--text-secondary);
+}
+
+/* Quick link grid */
+.quick-links .card {
+    text-align: left;
+    padding: 32px;
+    border-radius: 20px;
+}
+
+.quick-links .card i {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+
+.quick-links .card p {
+    color: var(--text-secondary);
+}
+
+.quick-links .card .btn {
+    margin-top: 20px;
+    align-self: flex-start;
+}
+
+/* Page hero */
+.page-hero {
+    padding-top: 140px;
+    padding-bottom: 80px;
+    background: linear-gradient(180deg, rgba(2, 6, 23, 0.6), rgba(2, 6, 23, 0.95));
+}
+
+.page-hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.page-hero p {
+    color: var(--text-secondary);
+}
+
+.breadcrumb-custom {
+    display: inline-flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: var(--accent);
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.breadcrumb-custom a {
+    color: var(--accent);
+}
+
+/* Noticias page */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 28px;
+}
+
+.news-article {
+    background: var(--bg-secondary);
+    border-radius: 22px;
+    border: 1px solid var(--card-border);
+    padding: 28px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.news-article h3 {
+    color: #f8fafc;
+    margin-top: 20px;
+}
+
+.news-article p {
+    color: var(--text-secondary);
+}
+
+.news-meta {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.news-article img {
+    border-radius: 16px;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Servicios page */
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+}
+
+.service-detail {
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: 22px;
+    padding: 32px;
+    box-shadow: var(--shadow-md);
+}
+
+.service-detail h3 {
+    color: #f8fafc;
+}
+
+.service-detail p,
+.service-detail li {
+    color: var(--text-secondary);
+}
+
+.service-detail ul {
+    padding-left: 18px;
+}
+
+/* Contacto page */
+.contact-layout {
+    display: grid;
+    gap: 28px;
+}
+
+@media (min-width: 992px) {
+    .contact-layout {
+        grid-template-columns: 1.1fr 0.9fr;
+    }
+}
+
+.contact-info-block {
+    background: var(--bg-secondary);
+    border-radius: 22px;
+    border: 1px solid var(--card-border);
+    padding: 36px;
+    box-shadow: var(--shadow-md);
+}
+
+.contact-info-block h3 {
+    color: #f8fafc;
+}
+
+.contact-info-block p,
+.contact-info-block li {
+    color: var(--text-secondary);
+}
+
+.contact-info-block li {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.contact-info-block i {
+    color: var(--accent);
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+.contact-form-card {
+    background: var(--bg-secondary);
+    border-radius: 22px;
+    border: 1px solid var(--card-border);
+    padding: 36px;
+    box-shadow: var(--shadow-md);
+}
+
+.contact-form-card h3 {
+    color: #f8fafc;
+}
+
+/* General layout */
+.page-section {
+    padding: 80px 0;
+}
+
+.page-section h2 {
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.page-section p {
+    color: var(--text-secondary);
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.tag-list span {
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: var(--accent);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 /* Responsive adjustments */
@@ -275,3 +533,13 @@ footer a {
         font-size: 2rem;
     }
 }
+.progress {
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(148, 163, 184, 0.18);
+}
+
+.progress-bar {
+    background: var(--accent);
+}
+
