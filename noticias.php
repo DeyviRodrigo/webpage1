@@ -12,7 +12,7 @@ $currentPage = 'noticias';
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="index.php">DAITEC &amp; TrazMAPE</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -57,28 +57,28 @@ $currentPage = 'noticias';
                         <span class="news-meta">Madre de Dios · Mayo 2024</span>
                         <h3>TrazMAPE llega a nuevas regiones amazónicas</h3>
                         <p>Especialistas de DAITEC entrenaron a 45 cooperativas auríferas en la actualización de registros, control de inventario y verificación de la cadena de custodia. El despliegue incluye soporte remoto y monitoreo satelital.</p>
-                        <a href="contacto.php" class="btn btn-outline-light mt-auto">Solicitar acompañamiento</a>
+                        <a href="contacto.php" class="btn btn-outline-primary mt-auto">Solicitar acompañamiento</a>
                     </article>
                     <article class="news-article">
                         <img src="images/news/news_2.jpg" alt="Laboratorio de innovación de DAITEC">
                         <span class="news-meta">Lima · Abril 2024</span>
                         <h3>Laboratorio de innovación integra sensores ambientales</h3>
                         <p>El laboratorio DAITEC conectó sensores de calidad de aire y agua a la plataforma TrazMAPE para entregar tableros en tiempo real a gobiernos regionales. La iniciativa mejora la toma de decisiones sobre operaciones responsables.</p>
-                        <a href="servicios.php" class="btn btn-outline-light mt-auto">Ver programa de innovación</a>
+                        <a href="servicios.php" class="btn btn-outline-primary mt-auto">Ver programa de innovación</a>
                     </article>
                     <article class="news-article">
                         <img src="images/news/news_3.jpg" alt="Mineros artesanales en sesión de trabajo">
                         <span class="news-meta">Ayacucho · Marzo 2024</span>
                         <h3>Alianzas para fortalecer la pequeña minería familiar</h3>
                         <p>DAITEC firmó convenios con gremios regionales y cooperativas para ampliar la asistencia técnica en seguridad ocupacional, cierre de pasivos y comercialización justa en corredores mineros priorizados.</p>
-                        <a href="servicios.php" class="btn btn-outline-light mt-auto">Explorar servicios territoriales</a>
+                        <a href="servicios.php" class="btn btn-outline-primary mt-auto">Explorar servicios territoriales</a>
                     </article>
                     <article class="news-article">
                         <img src="images/news/news_2.png" alt="Reunión de autoridades y mineros">
                         <span class="news-meta">Piura · Febrero 2024</span>
                         <h3>Mesas multiactor articulan proyectos de formalización</h3>
                         <p>Autoridades regionales, representantes de la pequeña minería y aliados internacionales definieron hojas de ruta conjuntas para reducir la informalidad y asegurar cadenas de suministro con enfoque social.</p>
-                        <a href="noticias.php" class="btn btn-outline-light mt-auto">Descargar informe</a>
+                        <a href="noticias.php" class="btn btn-outline-primary mt-auto">Descargar informe</a>
                     </article>
                 </div>
             </div>

@@ -1,73 +1,157 @@
-	/* Coded with love by Mutiullah Samim */
-		body,
-		html {
-			margin: 0;
-			padding: 0;
-			height: 100%;
-			background: #60a3bc !important;
-		}
-		.user_card {
-			height: 450px;
-			width: 350px;
-			margin-top: auto;
-			margin-bottom: auto;
-			background: #f39c12;
-			position: relative;
-			display: flex;
-			justify-content: center;
-			flex-direction: column;
-			padding: 10px;
-			box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-			-webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-			-moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-			border-radius: 5px;
+/* Acceso administrativo - estilo claro */
+body,
+html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: linear-gradient(160deg, #eff6ff 0%, #f8fafc 60%, #ffffff 100%) !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #0f172a;
+}
 
-		}
-		.brand_logo_container {
-			position: absolute;
-			height: 170px;
-			width: 170px;
-			top: -75px;
-			border-radius: 50%;
-			background: #60a3bc;
-			padding: 10px;
-			text-align: center;
-		}
-		.brand_logo {
-			height: 150px;
-			width: 150px;
-			border-radius: 50%;
-			border: 2px solid white;
-		}
-		.form_container {
-			margin-top: 100px;
-		}
-		.login_btn {
-			width: 100%;
-			background: #c0392b !important;
-			color: white !important;
-		}
-		.login_btn:focus {
-			box-shadow: none !important;
-			outline: 0px !important;
-		}
-		.login_container {
-			padding: 0 2rem;
-		}
-		.input-group-text {
-			background: #c0392b !important;
-			color: white !important;
-			border: 0 !important;
-			border-radius: 0.25rem 0 0 0.25rem !important;
-		}
-		.input_user,
-		.input_pass:focus {
-			box-shadow: none !important;
-			outline: 0px !important;
-		}
-		.custom-checkbox .custom-control-input:checked~.custom-control-label::before {
-			background-color: #c0392b !important;
-		}
+.user_card {
+        width: 380px;
+        margin-top: auto;
+        margin-bottom: auto;
+        background: #ffffff;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        padding: 36px 32px 32px;
+        border-radius: 20px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 30px 60px rgba(37, 99, 235, 0.18);
+}
+
+.brand_logo_container {
+        position: absolute;
+        height: 120px;
+        width: 120px;
+        top: -65px;
+        border-radius: 32px;
+        background: linear-gradient(135deg, #2563eb, #1e3a8a);
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 18px 36px rgba(37, 99, 235, 0.35);
+}
+
+.brand_logo {
+        height: 100%;
+        width: auto;
+}
+
+.brand_initials {
+        color: #ffffff;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 1px;
+}
+
+.form_container {
+        margin-top: 70px;
+}
+
+.login_btn {
+        width: 100%;
+        background: #2563eb !important;
+        border: 1px solid #1d4ed8 !important;
+        border-radius: 12px;
+        color: #ffffff !important;
+        font-weight: 600;
+        padding: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login_btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.25);
+}
+
+.login_btn:focus {
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+        outline: 0 !important;
+}
+
+.login_container {
+        padding: 0;
+}
+
+.input-group-text {
+        background: rgba(37, 99, 235, 0.1) !important;
+        color: #1e3a8a !important;
+        border: 1px solid rgba(37, 99, 235, 0.25) !important;
+        border-right: none !important;
+        border-radius: 12px 0 0 12px !important;
+}
+
+.input_user,
+.input_pass {
+        border-radius: 0 12px 12px 0 !important;
+        border: 1px solid rgba(148, 163, 184, 0.5) !important;
+        padding: 12px !important;
+        color: #0f172a !important;
+        background: #ffffff !important;
+}
+
+.input_user:focus,
+.input_pass:focus {
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
+        border-color: rgba(37, 99, 235, 0.55) !important;
+        outline: 0 !important;
+}
+
+.custom-checkbox .custom-control-input:checked~.custom-control-label::before {
+        background-color: #2563eb !important;
+}
+
+#mensaje {
+        font-weight: 600;
+        color: #1e3a8a;
+        margin-bottom: 18px;
+        text-align: center;
+}
+
+.captcha-image {
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 12px;
+        padding: 6px 12px;
+        background: #f1f5f9;
+}
+
+.user_card .form-control,
+.user_card .form-select {
+        border: 1px solid rgba(148, 163, 184, 0.45) !important;
+        border-radius: 12px !important;
+        padding: 12px !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        box-shadow: none !important;
+}
+
+.user_card .form-control:focus,
+.user_card .form-select:focus {
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
+        border-color: rgba(37, 99, 235, 0.55) !important;
+}
+
+.secondary_btn {
+        display: block;
+        background: transparent;
+        border: 1px solid rgba(37, 99, 235, 0.45);
+        color: #1e3a8a;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 12px;
+        transition: all 0.3s ease;
+}
+
+.secondary_btn:hover {
+        background: rgba(37, 99, 235, 0.1);
+        color: #1e3a8a;
+}
 
 
 #ritual{border:medium none;color:#333;min-height:500px; padding:0px;width:auto; margin:0px;font-family:arial,sans-serif;}

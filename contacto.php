@@ -12,7 +12,7 @@ $currentPage = 'contacto';
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="index.php">DAITEC &amp; TrazMAPE</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -115,21 +115,21 @@ $currentPage = 'contacto';
                         <div class="col-md-4">
                             <div class="service-card h-100">
                                 <i class="fas fa-map-marked-alt"></i>
-                                <h4 class="text-white">Madre de Dios</h4>
+                                <h4>Madre de Dios</h4>
                                 <p class="text-secondary">Centro de innovación y trazabilidad para cooperativas auríferas y aluviales.</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="service-card h-100">
                                 <i class="fas fa-mountain"></i>
-                                <h4 class="text-white">Puno</h4>
+                                <h4>Puno</h4>
                                 <p class="text-secondary">Acompañamiento a mineros filonianos y articulación con refinerías responsables.</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="service-card h-100">
                                 <i class="fas fa-seedling"></i>
-                                <h4 class="text-white">La Libertad</h4>
+                                <h4>La Libertad</h4>
                                 <p class="text-secondary">Programas de remediación y seguridad con enfoque comunitario.</p>
                             </div>
                         </div>

@@ -1,17 +1,17 @@
 :root {
-    --bg-base: #020617;
-    --bg-primary: #020617;
-    --bg-secondary: #0b1120;
-    --bg-elevated: rgba(15, 23, 42, 0.92);
-    --bg-muted: rgba(15, 23, 42, 0.75);
-    --accent: #38bdf8;
-    --accent-strong: #0ea5e9;
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --card-border: rgba(148, 163, 184, 0.18);
-    --shadow-lg: 0 30px 60px rgba(2, 6, 23, 0.55);
-    --shadow-md: 0 18px 35px rgba(2, 6, 23, 0.45);
+    --bg-base: #f5f7fb;
+    --bg-primary: #ffffff;
+    --bg-secondary: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-muted: #eef2ff;
+    --accent: #2563eb;
+    --accent-strong: #1e40af;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --card-border: rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 35px 60px rgba(15, 23, 42, 0.12);
+    --shadow-md: 0 20px 45px rgba(15, 23, 42, 0.1);
 }
 
 html, body {
@@ -19,8 +19,7 @@ html, body {
 }
 
 body {
-    background-image: radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 45%),
-                      linear-gradient(160deg, #020617 0%, #000 100%);
+    background-image: linear-gradient(180deg, rgba(224, 242, 254, 0.45) 0%, rgba(238, 242, 255, 0.85) 35%, #f8fafc 100%);
     color: var(--text-primary);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
@@ -36,9 +35,10 @@ a:hover {
 
 /* Navigation styles */
 .navbar {
-    background: rgba(2, 6, 23, 0.85) !important;
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--card-border);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
 .navbar-brand {
@@ -58,6 +58,18 @@ a:hover {
     transform: translateY(-2px);
 }
 
+.navbar-light .navbar-toggler {
+    border-color: rgba(37, 99, 235, 0.35);
+}
+
+.navbar-light .navbar-toggler:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.navbar-light .navbar-toggler-icon {
+    filter: invert(32%) sepia(96%) saturate(1824%) hue-rotate(210deg) brightness(93%) contrast(92%);
+}
+
 /* Carousel styles */
 .carousel-item {
     height: 520px;
@@ -66,19 +78,25 @@ a:hover {
 .carousel-item img {
     object-fit: cover;
     height: 100%;
-    filter: brightness(70%);
+    filter: brightness(85%);
 }
 
 .carousel-caption {
-    background: rgba(2, 6, 23, 0.7);
+    background: rgba(255, 255, 255, 0.88);
     padding: 30px;
-    border-radius: 16px;
-    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
 }
 
 .carousel-caption h3 {
-    color: #f8fafc;
+    color: var(--text-primary);
     font-weight: 700;
+}
+
+.carousel-caption p {
+    color: var(--text-secondary);
 }
 
 /* Section base styles */
@@ -91,7 +109,7 @@ section::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(148, 163, 184, 0.06), transparent 60%);
+    background: linear-gradient(180deg, rgba(148, 163, 184, 0.08), transparent 65%);
     opacity: 0.6;
     pointer-events: none;
 }
@@ -113,7 +131,7 @@ section::before {
 }
 
 .hero-content {
-    background: var(--bg-elevated);
+    background: var(--bg-primary);
     border-radius: 20px;
     padding: 40px;
     border: 1px solid var(--card-border);
@@ -124,8 +142,8 @@ section::before {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(56, 189, 248, 0.15);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.28);
     color: var(--accent);
     padding: 10px 18px;
     border-radius: 999px;
@@ -142,7 +160,7 @@ section::before {
 }
 
 .card {
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     border: 1px solid var(--card-border);
     border-radius: 18px;
     box-shadow: var(--shadow-md);
@@ -152,8 +170,8 @@ section::before {
 
 .card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 25px 50px rgba(8, 47, 73, 0.45);
-    border-color: rgba(56, 189, 248, 0.45);
+    box-shadow: 0 30px 60px rgba(37, 99, 235, 0.16);
+    border-color: rgba(37, 99, 235, 0.28);
 }
 
 .card-img-top {
@@ -162,7 +180,7 @@ section::before {
 }
 
 .card-title {
-    color: #f1f5f9;
+    color: var(--text-primary);
     font-weight: 700;
 }
 
@@ -172,37 +190,41 @@ section::before {
 
 .btn-primary {
     background: var(--accent);
-    border: none;
+    border: 1px solid var(--accent);
     border-radius: 999px;
     padding: 10px 22px;
     font-weight: 600;
-    transition: background 0.3s ease, transform 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btn-primary:hover {
     background: var(--accent-strong);
+    border-color: var(--accent-strong);
     transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.28);
 }
 
-.btn-outline-light {
-    color: var(--text-primary);
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    background: rgba(148, 163, 184, 0.12);
+.btn-outline-primary {
+    color: var(--accent);
+    border: 1px solid var(--accent);
     border-radius: 999px;
+    padding: 10px 22px;
+    font-weight: 600;
     transition: background 0.3s ease, transform 0.3s ease, color 0.3s ease;
 }
 
-.btn-outline-light:hover {
-    background: rgba(148, 163, 184, 0.25);
-    color: var(--text-primary);
+.btn-outline-primary:hover {
+    background: var(--accent);
+    color: #fff;
     transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.18);
 }
 
 /* Servicios */
 .service-card {
     height: 100%;
     padding: 30px;
-    background: var(--bg-muted);
+    background: var(--bg-primary);
     border: 1px solid var(--card-border);
     border-radius: 18px;
     transition: transform 0.4s ease, border-color 0.4s ease;
@@ -210,7 +232,7 @@ section::before {
 
 .service-card:hover {
     transform: translateY(-6px);
-    border-color: rgba(56, 189, 248, 0.45);
+    border-color: rgba(37, 99, 235, 0.32);
 }
 
 .service-card i {
@@ -221,14 +243,15 @@ section::before {
 
 /* Contacto */
 .contact-card {
-    background: var(--bg-muted);
+    background: var(--bg-primary);
     border: 1px solid var(--card-border);
     border-radius: 18px;
     padding: 35px;
+    box-shadow: var(--shadow-md);
 }
 
 .contact-card h4 {
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 .contact-detail {
@@ -251,8 +274,8 @@ section::before {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.22);
     margin-right: 12px;
     color: var(--accent);
     transition: transform 0.3s ease;
@@ -266,30 +289,35 @@ section::before {
 /* Footer styles */
 footer {
     margin-top: 40px;
-    background: rgba(2, 6, 23, 0.95);
-    border-top: 1px solid var(--card-border);
-    color: var(--text-secondary);
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: #e2e8f0;
 }
 
 footer a {
-    color: var(--accent);
+    color: #bfdbfe;
+}
+
+footer a:hover {
+    color: #fff;
 }
 
 /* Form styles */
 .form-control,
 .form-select {
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: #fff;
+    border: 1px solid var(--card-border);
     color: var(--text-primary);
     border-radius: 14px;
     padding: 12px 16px;
+    box-shadow: none;
 }
 
 .form-control:focus,
 .form-select:focus {
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
-    border-color: rgba(56, 189, 248, 0.5);
-    background: rgba(15, 23, 42, 0.92);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    border-color: rgba(37, 99, 235, 0.45);
+    background: #fff;
     color: var(--text-primary);
 }
 
@@ -306,6 +334,7 @@ label {
     text-align: left;
     padding: 32px;
     border-radius: 20px;
+    background: var(--bg-primary);
 }
 
 .quick-links .card i {
@@ -327,7 +356,7 @@ label {
 .page-hero {
     padding-top: 140px;
     padding-bottom: 80px;
-    background: linear-gradient(180deg, rgba(2, 6, 23, 0.6), rgba(2, 6, 23, 0.95));
+    background: linear-gradient(135deg, rgba(224, 242, 254, 0.85), rgba(219, 234, 254, 0.95));
 }
 
 .page-hero h1 {
@@ -337,6 +366,7 @@ label {
 
 .page-hero p {
     color: var(--text-secondary);
+    max-width: 720px;
 }
 
 .breadcrumb-custom {
@@ -345,8 +375,8 @@ label {
     align-items: center;
     padding: 10px 18px;
     border-radius: 999px;
-    background: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.25);
     color: var(--accent);
     font-size: 0.85rem;
     letter-spacing: 0.5px;
@@ -364,7 +394,7 @@ label {
 }
 
 .news-article {
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     border-radius: 22px;
     border: 1px solid var(--card-border);
     padding: 28px;
@@ -374,7 +404,7 @@ label {
 }
 
 .news-article h3 {
-    color: #f8fafc;
+    color: var(--text-primary);
     margin-top: 20px;
 }
 
@@ -404,15 +434,17 @@ label {
 }
 
 .service-detail {
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     border: 1px solid var(--card-border);
     border-radius: 22px;
     padding: 32px;
     box-shadow: var(--shadow-md);
 }
 
-.service-detail h3 {
-    color: #f8fafc;
+.service-detail h3,
+.service-detail h4,
+.service-detail h2 {
+    color: var(--text-primary);
 }
 
 .service-detail p,
@@ -437,15 +469,16 @@ label {
 }
 
 .contact-info-block {
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     border-radius: 22px;
     border: 1px solid var(--card-border);
     padding: 36px;
     box-shadow: var(--shadow-md);
 }
 
-.contact-info-block h3 {
-    color: #f8fafc;
+.contact-info-block h3,
+.contact-info-block h4 {
+    color: var(--text-primary);
 }
 
 .contact-info-block p,
@@ -466,7 +499,7 @@ label {
 }
 
 .contact-form-card {
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
     border-radius: 22px;
     border: 1px solid var(--card-border);
     padding: 36px;
@@ -474,7 +507,7 @@ label {
 }
 
 .contact-form-card h3 {
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 /* General layout */
@@ -482,9 +515,11 @@ label {
     padding: 80px 0;
 }
 
-.page-section h2 {
+.page-section h2,
+.page-section h4 {
     font-weight: 700;
     margin-bottom: 24px;
+    color: var(--text-primary);
 }
 
 .page-section p {
@@ -501,8 +536,8 @@ label {
 .tag-list span {
     padding: 8px 16px;
     border-radius: 999px;
-    background: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.22);
     color: var(--accent);
     font-size: 0.75rem;
     letter-spacing: 0.5px;
@@ -533,13 +568,13 @@ label {
         font-size: 2rem;
     }
 }
+
 .progress {
     border-radius: 999px;
     overflow: hidden;
-    background: rgba(148, 163, 184, 0.18);
+    background: rgba(148, 163, 184, 0.25);
 }
 
 .progress-bar {
     background: var(--accent);
 }
-

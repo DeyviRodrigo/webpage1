@@ -39,7 +39,7 @@ try {
 </head>
 <body>
     <!-- Navigation Menu -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="index.php">DAITEC &amp; TrazMAPE</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -131,7 +131,7 @@ try {
                         <p class="lead text-secondary">La Dirección de Asistencia Técnica para la Formalización (DAITEC) del Ministerio de Energía y Minas impulsa iniciativas que fortalecen la pequeña minería y la minería artesanal. Con TrazMAPE, la plataforma de trazabilidad para materiales auríferos, acompañamos a las organizaciones mineras en su transición hacia operaciones responsables, sostenibles y competitivas.</p>
                         <div class="d-flex flex-wrap gap-3 mt-4">
                             <a href="servicios.php" class="btn btn-primary">Conoce nuestros servicios</a>
-                            <a href="noticias.php" class="btn btn-outline-light">Últimas novedades</a>
+                            <a href="noticias.php" class="btn btn-outline-primary">Últimas novedades</a>
                         </div>
                     </div>
                 </div>
@@ -158,7 +158,7 @@ try {
                 <div class="col-md-4">
                     <div class="card h-100 d-flex flex-column">
                         <i class="fas fa-newspaper"></i>
-                        <h4 class="text-white">Noticias y alertas</h4>
+                        <h4>Noticias y alertas</h4>
                         <p>Entérate de los avances de la formalización, despliegues de TrazMAPE y convocatorias regionales para la pequeña minería responsable.</p>
                         <a href="noticias.php" class="btn btn-primary">Ver noticias</a>
                     </div>
@@ -166,7 +166,7 @@ try {
                 <div class="col-md-4">
                     <div class="card h-100 d-flex flex-column">
                         <i class="fas fa-tools"></i>
-                        <h4 class="text-white">Servicios especializados</h4>
+                        <h4>Servicios especializados</h4>
                         <p>Capacitaciones, soporte técnico y articulación territorial diseñados por DAITEC para fortalecer operaciones mineras sostenibles.</p>
                         <a href="servicios.php" class="btn btn-primary">Explorar servicios</a>
                     </div>
@@ -174,7 +174,7 @@ try {
                 <div class="col-md-4">
                     <div class="card h-100 d-flex flex-column">
                         <i class="fas fa-comments"></i>
-                        <h4 class="text-white">Conecta con nosotros</h4>
+                        <h4>Conecta con nosotros</h4>
                         <p>Agenda reuniones, solicita asistencia y descubre cómo integrarte a las cadenas de valor responsables que impulsa DAITEC.</p>
                         <a href="contacto.php" class="btn btn-primary">Ir a contacto</a>
                     </div>
@@ -206,7 +206,7 @@ try {
                 <div class="col-lg-6">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h4 class="card-title text-white">Resultados recientes</h4>
+                            <h4 class="card-title">Resultados recientes</h4>
                             <p class="card-text text-secondary">Más de 2,000 mineros capacitados en los últimos 12 meses, 15 oficinas regionales integradas a TrazMAPE y nuevas rutas comerciales para oro responsable.</p>
                             <div class="d-flex flex-column gap-3 mt-4">
                                 <div>
@@ -222,7 +222,7 @@ try {
                                     </div>
                                 </div>
                             </div>
-                            <a href="noticias.php" class="btn btn-outline-light mt-4">Conocer casos de éxito</a>
+                            <a href="noticias.php" class="btn btn-outline-primary mt-4">Conocer casos de éxito</a>
                         </div>
                     </div>
                 </div>

@@ -12,7 +12,7 @@ $currentPage = 'servicios';
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="index.php">DAITEC &amp; TrazMAPE</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -98,7 +98,7 @@ $currentPage = 'servicios';
                     <div class="col-lg-6">
                         <div class="service-card h-100">
                             <i class="fas fa-users-cog"></i>
-                            <h4 class="text-white">Programas para gobiernos regionales</h4>
+                            <h4>Programas para gobiernos regionales</h4>
                             <p class="text-secondary">Fortalecemos capacidades para supervisión, asistencia técnica y acompañamiento a pequeños productores mineros.</p>
                             <ul class="text-secondary list-unstyled mb-0">
                                 <li><i class="fas fa-check text-info me-2"></i>Rutas de formalización acelerada.</li>
@@ -110,7 +110,7 @@ $currentPage = 'servicios';
                     <div class="col-lg-6">
                         <div class="service-card h-100">
                             <i class="fas fa-leaf"></i>
-                            <h4 class="text-white">Gestión ambiental y social</h4>
+                            <h4>Gestión ambiental y social</h4>
                             <p class="text-secondary">Asesoría para implementar planes de manejo ambiental, remediación y relacionamiento comunitario.</p>
                             <ul class="text-secondary list-unstyled mb-0">
                                 <li><i class="fas fa-check text-info me-2"></i>Evaluación de impactos y medidas mitigadoras.</li>
