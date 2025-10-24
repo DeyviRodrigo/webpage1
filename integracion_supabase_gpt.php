@@ -133,8 +133,9 @@ class SupabaseNewsIntegrator
                 }
             } catch (Throwable $throwable) {
                 $summary['errors'][] = [
-                    'record'  => $record,
-                    'message' => $throwable->getMessage(),
+                    'record'      => $record,
+                    'record_json' => $this->encodeForLog($record),
+                    'message'     => $throwable->getMessage(),
                 ];
             }
         }
@@ -279,14 +280,19 @@ class SupabaseNewsIntegrator
             $sql = 'SELECT idNoticia FROM noticias WHERE enlace = ? LIMIT 1';
             $statement = $connection->prepare($sql);
             if ($statement === false) {
-                throw new RuntimeException('No fue posible preparar la verificación de noticias existentes por enlace.');
+                throw new RuntimeException(sprintf('No fue posible preparar la verificación de noticias existentes por enlace con SQL "%s".', $sql));
             }
 
             $statement->bind_param('s', $normalizedLink);
             if (!$statement->execute()) {
                 $error = $statement->error;
                 $statement->close();
-                throw new RuntimeException('Error al verificar noticias existentes por enlace: ' . $error);
+                throw new RuntimeException(sprintf(
+                    'Error al verificar noticias existentes por enlace con SQL "%s" y parámetros %s: %s',
+                    $sql,
+                    $this->encodeForLog([$normalizedLink]),
+                    $error
+                ));
             }
 
             $statement->store_result();
@@ -301,14 +307,19 @@ class SupabaseNewsIntegrator
         $sql = 'SELECT idNoticia FROM noticias WHERE titulo = ? AND fecha = ? LIMIT 1';
         $statement = $connection->prepare($sql);
         if ($statement === false) {
-            throw new RuntimeException('No fue posible preparar la verificación de noticias existentes por título y fecha.');
+            throw new RuntimeException(sprintf('No fue posible preparar la verificación de noticias existentes por título y fecha con SQL "%s".', $sql));
         }
 
         $statement->bind_param('ss', $title, $publishedAt);
         if (!$statement->execute()) {
             $error = $statement->error;
             $statement->close();
-            throw new RuntimeException('Error al verificar noticias existentes por título y fecha: ' . $error);
+            throw new RuntimeException(sprintf(
+                'Error al verificar noticias existentes por título y fecha con SQL "%s" y parámetros %s: %s',
+                $sql,
+                $this->encodeForLog([$title, $publishedAt]),
+                $error
+            ));
         }
 
         $statement->store_result();
@@ -326,14 +337,19 @@ class SupabaseNewsIntegrator
         $sql = 'SELECT idNoticia FROM noticias WHERE titulo = ? LIMIT 1';
         $statement = $connection->prepare($sql);
         if ($statement === false) {
-            throw new RuntimeException('No fue posible preparar la verificación de noticias existentes por título.');
+            throw new RuntimeException(sprintf('No fue posible preparar la verificación de noticias existentes por título con SQL "%s".', $sql));
         }
 
         $statement->bind_param('s', $title);
         if (!$statement->execute()) {
             $error = $statement->error;
             $statement->close();
-            throw new RuntimeException('Error al verificar noticias existentes por título: ' . $error);
+            throw new RuntimeException(sprintf(
+                'Error al verificar noticias existentes por título con SQL "%s" y parámetros %s: %s',
+                $sql,
+                $this->encodeForLog([$title]),
+                $error
+            ));
         }
 
         $statement->store_result();
@@ -349,7 +365,7 @@ class SupabaseNewsIntegrator
         $statement = $this->connection->GetLink()->prepare($sql);
 
         if ($statement === false) {
-            throw new RuntimeException('No fue posible preparar la inserción de noticias.');
+            throw new RuntimeException(sprintf('No fue posible preparar la inserción de noticias con SQL "%s".', $sql));
         }
 
         $linkParam = $link !== '' ? $link : null;
@@ -359,12 +375,38 @@ class SupabaseNewsIntegrator
         if (!$success) {
             $error = $statement->error;
             $statement->close();
-            throw new RuntimeException('Error al insertar la noticia: ' . $error);
+            throw new RuntimeException(sprintf(
+                'Error al insertar la noticia con SQL "%s" y parámetros %s: %s',
+                $sql,
+                $this->encodeForLog([
+                    $this->defaultUserId,
+                    $title,
+                    $body,
+                    $imageParam,
+                    $linkParam,
+                    $publishedAt,
+                ]),
+                $error
+            ));
         }
 
         $statement->close();
 
         return true;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function encodeForLog($value): string
+    {
+        $encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        if ($encoded === false) {
+            return '[Error al codificar JSON: ' . json_last_error_msg() . ']';
+        }
+
+        return $encoded;
     }
 
     /**
@@ -491,7 +533,20 @@ if (PHP_SAPI === 'cli' && realpath($_SERVER['argv'][0] ?? '') === __FILE__) {
         if (!empty($summary['errors'])) {
             fwrite(STDERR, "Errores encontrados:\n");
             foreach ($summary['errors'] as $error) {
-                fwrite(STDERR, '- ' . ($error['message'] ?? 'Error desconocido') . "\n");
+                $message = $error['message'] ?? 'Error desconocido';
+                fwrite(STDERR, '- Mensaje: ' . $message . "\n");
+
+                $recordJson = $error['record_json'] ?? null;
+                if (!is_string($recordJson) || $recordJson === '') {
+                    $encoded = json_encode($error['record'] ?? null, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    if ($encoded === false) {
+                        $recordJson = '[Error al codificar JSON: ' . json_last_error_msg() . ']';
+                    } else {
+                        $recordJson = $encoded;
+                    }
+                }
+
+                fwrite(STDERR, '  Registro Supabase: ' . $recordJson . "\n");
             }
         }
     } catch (Throwable $throwable) {
