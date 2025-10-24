@@ -4,8 +4,60 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/adm/script/conex.php';
 
+if (!function_exists('loadEnvFile')) {
+    /**
+     * Carga pares clave/valor desde un archivo .env simple y los inyecta en el entorno.
+     */
+    function loadEnvFile(string $path): void
+    {
+        if (!is_file($path) || !is_readable($path)) {
+            return;
+        }
+
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            return;
+        }
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || strpos($line, '#') === 0) {
+                continue;
+            }
+
+            $parts = explode('=', $line, 2);
+            if (count($parts) !== 2) {
+                continue;
+            }
+
+            $key = trim($parts[0]);
+            if ($key === '') {
+                continue;
+            }
+
+            $value = trim($parts[1]);
+            if ($value !== '') {
+                $firstChar = substr($value, 0, 1);
+                $lastChar  = substr($value, -1);
+                if (in_array($firstChar, [chr(34), chr(39)], true) && $firstChar === $lastChar) {
+                    $value = substr($value, 1, -1);
+                }
+            }
+
+            if (getenv($key) === false) {
+                putenv($key . '=' . $value);
+            }
+
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}
+
+loadEnvFile(__DIR__ . '/.env');
+
 /**
- * Herramienta de integración con Supabase para importar noticias y banners.
+ * Herramienta de integración con Supabase para importar noticias.
  */
 class SupabaseNewsIntegrator
 {
@@ -17,7 +69,6 @@ class SupabaseNewsIntegrator
     private string $newsTable;
     private string $newsSelect;
     private string $newsImageDir;
-    private string $bannerImageDir;
     private int $defaultUserId;
     private int $httpTimeout;
 
@@ -37,20 +88,16 @@ class SupabaseNewsIntegrator
         $this->newsTable   = trim((string) ($config['supabase_news_table'] ?? getenv('SUPABASE_NEWS_TABLE') ?: 'news'));
         $this->newsSelect  = (string) ($config['supabase_news_select'] ?? getenv('SUPABASE_NEWS_SELECT') ?: self::DEFAULT_NEWS_SELECT);
         $this->newsImageDir   = rtrim((string) ($config['news_image_dir'] ?? __DIR__ . '/images/news'), DIRECTORY_SEPARATOR);
-        $this->bannerImageDir = rtrim((string) ($config['banner_image_dir'] ?? __DIR__ . '/images/banner'), DIRECTORY_SEPARATOR);
         $this->defaultUserId  = (int) ($config['default_user_id'] ?? getenv('SUPABASE_DEFAULT_USER_ID') ?: 1);
         $this->httpTimeout    = (int) ($config['http_timeout'] ?? getenv('SUPABASE_HTTP_TIMEOUT') ?: 30);
 
         $this->fieldMap = [
-            'id'                  => (string) ($config['field_map']['id'] ?? getenv('SUPABASE_FIELD_ID') ?? 'id'),
-            'title'               => (string) ($config['field_map']['title'] ?? getenv('SUPABASE_FIELD_TITLE') ?? 'title'),
-            'body'                => (string) ($config['field_map']['body'] ?? getenv('SUPABASE_FIELD_BODY') ?? 'body'),
-            'image'               => (string) ($config['field_map']['image'] ?? getenv('SUPABASE_FIELD_IMAGE') ?? 'image_url'),
-            'link'                => (string) ($config['field_map']['link'] ?? getenv('SUPABASE_FIELD_LINK') ?? 'link'),
-            'published_at'        => (string) ($config['field_map']['published_at'] ?? getenv('SUPABASE_FIELD_PUBLISHED_AT') ?? 'published_at'),
-            'banner_title'        => (string) ($config['field_map']['banner_title'] ?? getenv('SUPABASE_FIELD_BANNER_TITLE') ?? 'banner_title'),
-            'banner_description'  => (string) ($config['field_map']['banner_description'] ?? getenv('SUPABASE_FIELD_BANNER_DESCRIPTION') ?? 'banner_description'),
-            'banner_link'         => (string) ($config['field_map']['banner_link'] ?? getenv('SUPABASE_FIELD_BANNER_LINK') ?? 'banner_link'),
+            'id'           => (string) ($config['field_map']['id'] ?? getenv('SUPABASE_FIELD_ID') ?? 'id'),
+            'title'        => (string) ($config['field_map']['title'] ?? getenv('SUPABASE_FIELD_TITLE') ?? 'title'),
+            'body'         => (string) ($config['field_map']['body'] ?? getenv('SUPABASE_FIELD_BODY') ?? 'body'),
+            'image'        => (string) ($config['field_map']['image'] ?? getenv('SUPABASE_FIELD_IMAGE') ?? 'image_url'),
+            'link'         => (string) ($config['field_map']['link'] ?? getenv('SUPABASE_FIELD_LINK') ?? 'link'),
+            'published_at' => (string) ($config['field_map']['published_at'] ?? getenv('SUPABASE_FIELD_PUBLISHED_AT') ?? 'published_at'),
         ];
 
         if ($this->supabaseUrl === '' || $this->supabaseKey === '') {
@@ -68,11 +115,10 @@ class SupabaseNewsIntegrator
         $records = $this->fetchNewsFromSupabase();
 
         $summary = [
-            'processed'        => 0,
-            'created_news'     => 0,
-            'created_banners'  => 0,
-            'skipped'          => 0,
-            'errors'           => [],
+            'processed'    => 0,
+            'created_news' => 0,
+            'skipped'      => 0,
+            'errors'       => [],
         ];
 
         foreach ($records as $record) {
@@ -81,9 +127,8 @@ class SupabaseNewsIntegrator
             try {
                 $result = $this->syncRecord($record);
                 $summary['created_news'] += $result['news_created'] ? 1 : 0;
-                $summary['created_banners'] += $result['banner_created'] ? 1 : 0;
 
-                if (!$result['news_created'] && !$result['banner_created']) {
+                if (!$result['news_created']) {
                     $summary['skipped']++;
                 }
             } catch (Throwable $throwable) {
@@ -100,7 +145,7 @@ class SupabaseNewsIntegrator
     /**
      * @param array<string, mixed> $record
      *
-     * @return array{news_created: bool, banner_created: bool}
+     * @return array{news_created: bool}
      */
     private function syncRecord(array $record): array
     {
@@ -119,46 +164,18 @@ class SupabaseNewsIntegrator
         $link = trim((string) ($record[$this->fieldMap['link']] ?? ''));
         $publishedAt = $this->resolvePublishedAt($record[$this->fieldMap['published_at']] ?? null);
 
-        $bannerTitle = trim((string) ($record[$this->fieldMap['banner_title']] ?? ''));
-        if ($bannerTitle === '') {
-            $bannerTitle = $title;
-        }
-
-        $bannerDescription = trim((string) ($record[$this->fieldMap['banner_description']] ?? ''));
-        if ($bannerDescription === '') {
-            $bannerDescription = $this->truncateText($body, 200);
-        }
-
-        $bannerLink = trim((string) ($record[$this->fieldMap['banner_link']] ?? ''));
-        if ($bannerLink === '') {
-            $bannerLink = $link;
-        }
-
         $needsNews   = !$this->newsExists($title, $publishedAt);
-        $needsBanner = !$this->bannerExists($bannerTitle);
-
-        if (!$needsNews && !$needsBanner) {
+        if (!$needsNews) {
             return [
-                'news_created'   => false,
-                'banner_created' => false,
+                'news_created' => false,
             ];
         }
 
         $downloadedImage = $this->downloadImageToTemp($imageUrl);
 
         try {
-            $newsCreated = false;
-            $bannerCreated = false;
-
-            if ($needsNews) {
-                $newsImageName = $this->storeImageFromTemp($downloadedImage['path'], $downloadedImage['extension'], $this->newsImageDir, 'news');
-                $newsCreated   = $this->createNews($title, $body, $link, $newsImageName, $publishedAt);
-            }
-
-            if ($needsBanner) {
-                $bannerImageName = $this->storeImageFromTemp($downloadedImage['path'], $downloadedImage['extension'], $this->bannerImageDir, 'banner');
-                $bannerCreated   = $this->createBanner($bannerTitle, $bannerDescription, $bannerLink, $bannerImageName, $publishedAt);
-            }
+            $newsImageName = $this->storeImageFromTemp($downloadedImage['path'], $downloadedImage['extension'], $this->newsImageDir, 'news');
+            $newsCreated   = $this->createNews($title, $body, $link, $newsImageName, $publishedAt);
         } finally {
             if (is_file($downloadedImage['path'])) {
                 @unlink($downloadedImage['path']);
@@ -166,8 +183,7 @@ class SupabaseNewsIntegrator
         }
 
         return [
-            'news_created'   => $needsNews && $newsCreated,
-            'banner_created' => $needsBanner && $bannerCreated,
+            'news_created' => $newsCreated,
         ];
     }
 
@@ -259,30 +275,6 @@ class SupabaseNewsIntegrator
         return $exists;
     }
 
-    private function bannerExists(string $title): bool
-    {
-        $link = $this->connection->GetLink();
-        $sql = 'SELECT idBanner FROM banner WHERE Titulo = ? LIMIT 1';
-
-        $statement = $link->prepare($sql);
-        if ($statement === false) {
-            throw new RuntimeException('No fue posible preparar la verificación de banners existentes.');
-        }
-
-        $statement->bind_param('s', $title);
-        if (!$statement->execute()) {
-            $error = $statement->error;
-            $statement->close();
-            throw new RuntimeException('Error al verificar banners existentes: ' . $error);
-        }
-
-        $statement->store_result();
-        $exists = $statement->num_rows > 0;
-        $statement->close();
-
-        return $exists;
-    }
-
     private function createNews(string $title, string $body, string $link, ?string $imageName, string $publishedAt): bool
     {
         $sql = 'INSERT INTO noticias (usersId, titulo, cuerpo, imagen, enlace, estado, fecha) VALUES (?, ?, ?, ?, ?, 1, ?)';
@@ -300,30 +292,6 @@ class SupabaseNewsIntegrator
             $error = $statement->error;
             $statement->close();
             throw new RuntimeException('Error al insertar la noticia: ' . $error);
-        }
-
-        $statement->close();
-
-        return true;
-    }
-
-    private function createBanner(string $title, string $description, string $link, ?string $imageName, string $publishedAt): bool
-    {
-        $sql = 'INSERT INTO banner (usersId, Titulo, Describir, Enlace, Imagen, estado, fecha) VALUES (?, ?, ?, ?, ?, 1, ?)';
-        $statement = $this->connection->GetLink()->prepare($sql);
-
-        if ($statement === false) {
-            throw new RuntimeException('No fue posible preparar la inserción de banners.');
-        }
-
-        $linkParam = $link !== '' ? $link : null;
-        $imageParam = $imageName;
-        $statement->bind_param('isssss', $this->defaultUserId, $title, $description, $linkParam, $imageParam, $publishedAt);
-        $success = $statement->execute();
-        if (!$success) {
-            $error = $statement->error;
-            $statement->close();
-            throw new RuntimeException('Error al insertar el banner: ' . $error);
         }
 
         $statement->close();
@@ -435,27 +403,6 @@ class SupabaseNewsIntegrator
         return 'jpg';
     }
 
-    private function truncateText(string $text, int $length): string
-    {
-        $text = trim($text);
-        if ($text === '') {
-            return '';
-        }
-
-        if (function_exists('mb_strlen')) {
-            if (mb_strlen($text, 'UTF-8') <= $length) {
-                return $text;
-            }
-
-            return rtrim(mb_substr($text, 0, $length, 'UTF-8')) . '…';
-        }
-
-        if (strlen($text) <= $length) {
-            return $text;
-        }
-
-        return rtrim(substr($text, 0, $length)) . '…';
-    }
 }
 
 if (PHP_SAPI === 'cli' && realpath($_SERVER['argv'][0] ?? '') === __FILE__) {
@@ -467,10 +414,9 @@ if (PHP_SAPI === 'cli' && realpath($_SERVER['argv'][0] ?? '') === __FILE__) {
         $summary = $integrator->import();
 
         fwrite(STDOUT, sprintf(
-            "Noticias procesadas: %d\nCreadas: %d\nBanners creados: %d\nOmitidas: %d\n",
+            "Noticias procesadas: %d\nCreadas: %d\nOmitidas: %d\n",
             $summary['processed'],
             $summary['created_news'],
-            $summary['created_banners'],
             $summary['skipped']
         ));
 
