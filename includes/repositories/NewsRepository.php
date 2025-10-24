@@ -85,17 +85,29 @@ class NewsRepository
         int $newsId,
         string $title,
         string $body,
-        int $status
+        int $status,
+        ?string $imageName = null
     ): bool {
-        $sql = 'UPDATE noticias SET titulo = ?, cuerpo = ?, estado = ? WHERE idNoticia = ?';
-
         $link = $this->connection->GetLink();
-        $statement = $link->prepare($sql);
-        if ($statement === false) {
-            return false;
+
+        if ($imageName !== null) {
+            $sql = 'UPDATE noticias SET titulo = ?, cuerpo = ?, estado = ?, imagen = ? WHERE idNoticia = ?';
+            $statement = $link->prepare($sql);
+            if ($statement === false) {
+                return false;
+            }
+
+            $statement->bind_param('ssisi', $title, $body, $status, $imageName, $newsId);
+        } else {
+            $sql = 'UPDATE noticias SET titulo = ?, cuerpo = ?, estado = ? WHERE idNoticia = ?';
+            $statement = $link->prepare($sql);
+            if ($statement === false) {
+                return false;
+            }
+
+            $statement->bind_param('ssii', $title, $body, $status, $newsId);
         }
 
-        $statement->bind_param('ssii', $title, $body, $status, $newsId);
         $success = $statement->execute();
         $statement->close();
 
