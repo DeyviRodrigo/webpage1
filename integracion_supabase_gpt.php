@@ -86,7 +86,7 @@ class ImportOperationException extends RuntimeException
  */
 class SupabaseNewsIntegrator
 {
-    private const DEFAULT_NEWS_SELECT = '*';
+    private const DEFAULT_NEWS_SELECT = 'id,title,body,image_url,source_url,published_at';
 
     private MySQLcn $connection;
     private string $supabaseUrl;
@@ -177,16 +177,24 @@ class SupabaseNewsIntegrator
      */
     private function syncRecord(array $record): array
     {
-        $title = trim((string) ($record[$this->fieldMap['title']] ?? ''));
-        $body  = (string) ($record[$this->fieldMap['body']] ?? '');
+        if (is_object($record)) {
+            $record = $this->normalizeObjectRecord($record);
+        }
+
+        if (!is_array($record)) {
+            throw new RuntimeException('El registro obtenido de Supabase no es un arreglo válido.');
+        }
+
+        $title = trim((string) ($record[$this->fieldMap['title']] ?? $record['title'] ?? $record['titulo'] ?? ''));
+        $body  = (string) ($record[$this->fieldMap['body']] ?? $record['body'] ?? $record['cuerpo'] ?? '');
 
         if ($title === '') {
             throw new RuntimeException('El registro obtenido de Supabase no contiene un título válido.');
         }
 
-        $imageUrl = trim((string) ($record[$this->fieldMap['image']] ?? ''));
-        $link = trim((string) ($record[$this->fieldMap['link']] ?? ''));
-        $publishedAtRaw = $record[$this->fieldMap['published_at']] ?? null;
+        $imageUrl = trim((string) ($record[$this->fieldMap['image']] ?? $record['image_url'] ?? $record['imagen'] ?? ''));
+        $link = trim((string) ($record[$this->fieldMap['link']] ?? $record['source_url'] ?? $record['enlace'] ?? ''));
+        $publishedAtRaw = $record[$this->fieldMap['published_at']] ?? $record['published_at'] ?? $record['fecha'] ?? null;
         $publishedAt    = $this->resolvePublishedAt($publishedAtRaw);
         $hasPublishedAt = is_string($publishedAtRaw) && trim($publishedAtRaw) !== '';
 
@@ -275,7 +283,23 @@ class SupabaseNewsIntegrator
             throw new RuntimeException('La respuesta de Supabase no se pudo decodificar como JSON.');
         }
 
-        return $data;
+        if (isset($data['data']) && is_array($data['data'])) {
+            $rows = $data['data'];
+        } else {
+            $rows = $data;
+        }
+
+        if (!empty($rows) && is_object($rows[0] ?? null)) {
+            $rows = array_map(fn($row) => $this->normalizeObjectRecord($row), $rows);
+        }
+
+        foreach ($rows as $index => $row) {
+            if (is_object($row)) {
+                $rows[$index] = (array) $row;
+            }
+        }
+
+        return array_values(array_filter($rows, 'is_array'));
     }
 
     /**
@@ -283,16 +307,18 @@ class SupabaseNewsIntegrator
      */
     private function resolvePublishedAt($publishedAt): string
     {
-        if (is_string($publishedAt) && $publishedAt !== '') {
+        $timezone = new DateTimeZone('America/Lima');
+
+        if (is_string($publishedAt) && trim($publishedAt) !== '') {
             try {
                 $dateTime = new DateTimeImmutable($publishedAt);
-                return $dateTime->format('Y-m-d H:i:s');
+                return $dateTime->setTimezone($timezone)->format('Y-m-d H:i:s');
             } catch (Exception $exception) {
                 // Ignorar y continuar con la fecha actual.
             }
         }
 
-        return date('Y-m-d H:i:s');
+        return (new DateTimeImmutable('now', $timezone))->format('Y-m-d H:i:s');
     }
 
     /**
@@ -436,6 +462,26 @@ class SupabaseNewsIntegrator
         }
 
         return $encoded;
+    }
+
+    /**
+     * @param object $record
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeObjectRecord(object $record): array
+    {
+        $encoded = json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($encoded === false) {
+            return (array) $record;
+        }
+
+        $decoded = json_decode($encoded, true);
+        if (!is_array($decoded)) {
+            return (array) $record;
+        }
+
+        return $decoded;
     }
 
     /**
