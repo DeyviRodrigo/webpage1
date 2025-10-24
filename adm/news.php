@@ -75,8 +75,14 @@ if ($permissionConnection !== null) {
                         </div>
                     <?php endif; ?>
                     <div class="card dashboard-card">
-                <div class="card-header">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <h4 class="mb-0">Publicar nueva noticia</h4>
+                    <form id="bulkUploadForm" action="importar_noticias_supabase.php" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-outline-light d-flex align-items-center gap-2">
+                            <i class="fas fa-cloud-download-alt"></i>
+                            <span>Subir en bloque</span>
+                        </button>
+                    </form>
                 </div>
                 <div class="card-body">
                     <form action="procesar_noticia.php" method="POST" enctype="multipart/form-data">
@@ -174,6 +180,24 @@ if ($permissionConnection !== null) {
             preview.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="Vista previa">`;
         };
         reader.readAsDataURL(file);
+    }
+
+    const bulkUploadForm = document.getElementById('bulkUploadForm');
+    if (bulkUploadForm) {
+        bulkUploadForm.addEventListener('submit', (event) => {
+            const confirmation = confirm('¿Deseas importar todas las noticias disponibles desde Supabase?');
+            if (!confirmation) {
+                event.preventDefault();
+                return;
+            }
+
+            const submitButton = bulkUploadForm.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add('disabled');
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ms-2">Importando…</span>';
+            }
+        });
     }
 </script>
 </body>
