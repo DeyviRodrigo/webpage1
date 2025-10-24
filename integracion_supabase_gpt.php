@@ -56,6 +56,31 @@ if (!function_exists('loadEnvFile')) {
 
 loadEnvFile(__DIR__ . '/.env');
 
+class ImportOperationException extends RuntimeException
+{
+    /**
+     * @var array<string, mixed>
+     */
+    private array $details;
+
+    /**
+     * @param array<string, mixed> $details
+     */
+    public function __construct(string $message, array $details = [], int $code = 0, ?Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+        $this->details = $details;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getDetails(): array
+    {
+        return $this->details;
+    }
+}
+
 /**
  * Herramienta de integración con Supabase para importar noticias.
  */
@@ -136,6 +161,8 @@ class SupabaseNewsIntegrator
                     'record'      => $record,
                     'record_json' => $this->encodeForLog($record),
                     'message'     => $throwable->getMessage(),
+                    'error_class' => get_class($throwable),
+                    'details'     => $throwable instanceof ImportOperationException ? $throwable->getDetails() : null,
                 ];
             }
         }
@@ -375,19 +402,21 @@ class SupabaseNewsIntegrator
         if (!$success) {
             $error = $statement->error;
             $statement->close();
-            throw new RuntimeException(sprintf(
-                'Error al insertar la noticia con SQL "%s" y parámetros %s: %s',
-                $sql,
-                $this->encodeForLog([
-                    $this->defaultUserId,
-                    $title,
-                    $body,
-                    $imageParam,
-                    $linkParam,
-                    $publishedAt,
-                ]),
-                $error
-            ));
+            throw new ImportOperationException(
+                'Error al insertar la noticia en la base de datos.',
+                [
+                    'sql'            => $sql,
+                    'parameters'     => [
+                        'usersId' => $this->defaultUserId,
+                        'titulo'  => $title,
+                        'cuerpo'  => $body,
+                        'imagen'  => $imageParam,
+                        'enlace'  => $linkParam,
+                        'fecha'   => $publishedAt,
+                    ],
+                    'database_error' => $error,
+                ]
+            );
         }
 
         $statement->close();
