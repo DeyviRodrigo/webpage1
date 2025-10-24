@@ -24,7 +24,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 $usuarioId = (int) ($_SESSION['idUser'] ?? 0);
 
 require_once __DIR__ . '/../integracion_supabase_gpt.php';
-require_once __DIR__ . '/includes/repositories/PermissionRepository.php';
+require_once __DIR__ . '/../includes/repositories/PermissionRepository.php';
 
 $canManageNews = false;
 $connection = null;
