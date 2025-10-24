@@ -63,6 +63,13 @@ if ($repository !== null && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'update') {
+        $existingNews = $repository->findById($newsId);
+        if ($existingNews === null) {
+            $connection->Close();
+            header("Location: {$redirectBase}?error=" . urlencode('La noticia seleccionada no existe.'));
+            exit();
+        }
+
         $title  = trim((string) ($_POST['title'] ?? ''));
         $body   = trim((string) ($_POST['body'] ?? ''));
         $status = isset($_POST['estado']) ? 1 : 0;
@@ -73,14 +80,106 @@ if ($repository !== null && $_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
-        $updated = $repository->update($newsId, $title, $body, $status);
-        $connection->Close();
-
-        if ($updated) {
-            header("Location: {$redirectBase}?mensaje=" . urlencode('La noticia se actualizó correctamente.'));
-        } else {
-            header("Location: {$redirectBase}?error=" . urlencode('No fue posible actualizar la noticia.'));
+        $baseImageDirectory = __DIR__ . '/../images/news';
+        $imageDirectory = realpath($baseImageDirectory);
+        if ($imageDirectory === false) {
+            $imageDirectory = $baseImageDirectory;
         }
+
+        $newImageName = null;
+        $newImageFullPath = null;
+
+        if (isset($_FILES['imagen']) && isset($_FILES['imagen']['error']) && (int) $_FILES['imagen']['error'] !== UPLOAD_ERR_NO_FILE) {
+            if ((int) $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {
+                $connection->Close();
+                header("Location: {$redirectBase}?error=" . urlencode('No se pudo cargar la imagen seleccionada.'));
+                exit();
+            }
+
+            $file      = $_FILES['imagen'];
+            $type      = (string) ($file['type'] ?? '');
+            $size      = isset($file['size']) ? (int) $file['size'] : 0;
+            $temporary = (string) ($file['tmp_name'] ?? '');
+
+            $allowedTypes = [
+                'image/jpeg' => 'jpg',
+                'image/png'  => 'png',
+                'image/gif'  => 'gif',
+            ];
+
+            if (!array_key_exists($type, $allowedTypes)) {
+                $connection->Close();
+                header("Location: {$redirectBase}?error=" . urlencode('Formato de imagen inválido. Solo se permiten JPG, PNG o GIF.'));
+                exit();
+            }
+
+            if ($size > 5 * 1024 * 1024) {
+                $connection->Close();
+                header("Location: {$redirectBase}?error=" . urlencode('La imagen supera el tamaño máximo permitido de 5MB.'));
+                exit();
+            }
+
+            if ($temporary === '' || !is_uploaded_file($temporary)) {
+                $connection->Close();
+                header("Location: {$redirectBase}?error=" . urlencode('La imagen cargada no es válida.'));
+                exit();
+            }
+
+            $extension = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
+            if ($extension === '') {
+                $extension = $allowedTypes[$type];
+            }
+
+            try {
+                $nameBase = 'news_' . date('YmdHis') . '_' . bin2hex(random_bytes(3));
+            } catch (Throwable $exception) {
+                $connection->Close();
+                header("Location: {$redirectBase}?error=" . urlencode('No se pudo generar un nombre para la imagen.'));
+                exit();
+            }
+
+            $newImageName = $nameBase . '.' . $extension;
+
+            if (!is_dir($imageDirectory)) {
+                if (!mkdir($imageDirectory, 0777, true) && !is_dir($imageDirectory)) {
+                    $connection->Close();
+                    header("Location: {$redirectBase}?error=" . urlencode('No fue posible preparar la carpeta de noticias.'));
+                    exit();
+                }
+            }
+
+            $newImageFullPath = rtrim($imageDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $newImageName;
+
+            if (!move_uploaded_file($temporary, $newImageFullPath)) {
+                $connection->Close();
+                header("Location: {$redirectBase}?error=" . urlencode('No se pudo guardar la imagen en el servidor.'));
+                exit();
+            }
+        }
+
+        $updated = $repository->update($newsId, $title, $body, $status, $newImageName);
+
+        if (!$updated) {
+            if ($newImageFullPath !== null && is_file($newImageFullPath)) {
+                @unlink($newImageFullPath);
+            }
+            $connection->Close();
+            header("Location: {$redirectBase}?error=" . urlencode('No fue posible actualizar la noticia.'));
+            exit();
+        }
+
+        if ($newImageName !== null) {
+            $previousImage = isset($existingNews['imagen']) ? (string) $existingNews['imagen'] : '';
+            if ($previousImage !== '' && $previousImage !== $newImageName) {
+                $previousFullPath = rtrim($imageDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $previousImage;
+                if (is_file($previousFullPath)) {
+                    @unlink($previousFullPath);
+                }
+            }
+        }
+
+        $connection->Close();
+        header("Location: {$redirectBase}?mensaje=" . urlencode('La noticia se actualizó correctamente.'));
         exit();
     }
 
@@ -240,6 +339,7 @@ function formatDate(?string $date): string
                                             data-title="<?php echo htmlspecialchars((string) $news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
                                             data-body="<?php echo htmlspecialchars((string) $news['cuerpo'], ENT_QUOTES, 'UTF-8'); ?>"
                                             data-status="<?php echo (int) $news['estado']; ?>"
+                                            data-image="<?php echo htmlspecialchars((string) ($news['imagen'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                         >
                                             <i class="fas fa-edit me-1"></i>Editar
                                         </button>
@@ -266,7 +366,7 @@ function formatDate(?string $date): string
 <div class="modal fade" id="editNewsModal" tabindex="-1" aria-labelledby="editNewsLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="POST" action="<?php echo $redirectBase; ?>">
+            <form method="POST" action="<?php echo $redirectBase; ?>" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editNewsLabel">Editar noticia</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -281,6 +381,18 @@ function formatDate(?string $date): string
                     <div class="mb-3">
                         <label for="news-body" class="form-label">Contenido</label>
                         <textarea class="form-control" id="news-body" name="body" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label d-block">Imagen actual</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <img id="news-current-image" src="" alt="Vista previa de la noticia" class="img-thumbnail d-none" style="max-height: 140px;">
+                            <span id="news-no-image" class="text-muted">Sin imagen asociada.</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="news-image" class="form-label">Nueva imagen</label>
+                        <input class="form-control" type="file" id="news-image" name="imagen" accept="image/jpeg,image/png,image/gif">
+                        <div class="form-text">Formatos permitidos: JPG, PNG o GIF. Tamaño máximo 5MB.</div>
                     </div>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="news-status" name="estado">
@@ -298,13 +410,35 @@ function formatDate(?string $date): string
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    const editNewsModal = document.getElementById('editNewsModal');
+    const imageBasePath = <?php echo json_encode('../images/news/'); ?>;
+
+    const imagePreview = editNewsModal.querySelector('#news-current-image');
+    const imagePlaceholder = editNewsModal.querySelector('#news-no-image');
+    const imageInput = editNewsModal.querySelector('#news-image');
+
     document.querySelectorAll('.edit-news-btn').forEach(function (button) {
         button.addEventListener('click', function () {
-            const modal = document.getElementById('editNewsModal');
-            modal.querySelector('#news-id').value = this.dataset.id || '';
-            modal.querySelector('#news-title').value = this.dataset.title || '';
-            modal.querySelector('#news-body').value = this.dataset.body || '';
-            modal.querySelector('#news-status').checked = parseInt(this.dataset.status || '0', 10) === 1;
+            editNewsModal.querySelector('#news-id').value = this.dataset.id || '';
+            editNewsModal.querySelector('#news-title').value = this.dataset.title || '';
+            editNewsModal.querySelector('#news-body').value = this.dataset.body || '';
+            editNewsModal.querySelector('#news-status').checked = parseInt(this.dataset.status || '0', 10) === 1;
+
+            const imageName = this.dataset.image || '';
+
+            if (imageName !== '') {
+                imagePreview.src = imageBasePath + imageName;
+                imagePreview.classList.remove('d-none');
+                imagePlaceholder.classList.add('d-none');
+            } else {
+                imagePreview.src = '';
+                imagePreview.classList.add('d-none');
+                imagePlaceholder.classList.remove('d-none');
+            }
+
+            if (imageInput) {
+                imageInput.value = '';
+            }
         });
     });
 </script>

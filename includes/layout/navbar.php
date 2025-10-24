@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $sessionActive = false;
 $sessionTarget = 'adm/user.php';
+$sessionUserName = 'Usuario';
 
 if (isset($_SESSION['login'])) {
     $sessionLifetime = 12000; // 200 minutos, como en el panel de administración
@@ -28,6 +29,11 @@ if (isset($_SESSION['login'])) {
         if (!in_array($nivel, [1, 2], true)) {
             $sessionTarget = 'adm/news.php';
         }
+
+        $sessionUserName = trim((string) ($_SESSION['nombre'] ?? ''));
+        if ($sessionUserName === '') {
+            $sessionUserName = 'Usuario';
+        }
     }
 }
 ?>
@@ -49,8 +55,11 @@ if (isset($_SESSION['login'])) {
                     <a class="nav-link" href="#contact">Contacto</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="http://localhost:56931/#/calculadora">ToolMAPE</a>
+                </li>
+                <li class="nav-item">
                     <?php if ($sessionActive): ?>
-                        <a class="nav-link" href="<?php echo htmlspecialchars($sessionTarget, ENT_QUOTES, 'UTF-8'); ?>">Iniciar Sesión</a>
+                        <a class="nav-link" href="<?php echo htmlspecialchars($sessionTarget, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($sessionUserName, ENT_QUOTES, 'UTF-8'); ?></a>
                     <?php else: ?>
                         <a class="nav-link" href="#" onclick="openLoginModal(); return false;">Iniciar Sesión</a>
                     <?php endif; ?>
