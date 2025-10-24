@@ -158,9 +158,11 @@ class SupabaseNewsIntegrator
 
         $imageUrl = trim((string) ($record[$this->fieldMap['image']] ?? ''));
         $link = trim((string) ($record[$this->fieldMap['link']] ?? ''));
-        $publishedAt = $this->resolvePublishedAt($record[$this->fieldMap['published_at']] ?? null);
+        $publishedAtRaw = $record[$this->fieldMap['published_at']] ?? null;
+        $publishedAt    = $this->resolvePublishedAt($publishedAtRaw);
+        $hasPublishedAt = is_string($publishedAtRaw) && trim($publishedAtRaw) !== '';
 
-        $needsNews   = !$this->newsExists($title, $publishedAt, $link);
+        $needsNews   = !$this->newsExists($title, $publishedAt, $link, $hasPublishedAt);
         if (!$needsNews) {
             return [
                 'news_created' => false,
@@ -265,7 +267,10 @@ class SupabaseNewsIntegrator
         return date('Y-m-d H:i:s');
     }
 
-    private function newsExists(string $title, string $publishedAt, string $linkValue): bool
+    /**
+     * Verifica si ya existe una noticia compatible con el registro obtenido desde Supabase.
+     */
+    private function newsExists(string $title, string $publishedAt, string $linkValue, bool $hasPublishedAt): bool
     {
         $connection = $this->connection->GetLink();
         $normalizedLink = trim($linkValue);
@@ -312,6 +317,10 @@ class SupabaseNewsIntegrator
 
         if ($exists) {
             return true;
+        }
+
+        if ($hasPublishedAt) {
+            return false;
         }
 
         $sql = 'SELECT idNoticia FROM noticias WHERE titulo = ? LIMIT 1';
