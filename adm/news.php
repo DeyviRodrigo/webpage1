@@ -17,6 +17,11 @@ $usuarioId = (int) ($_SESSION['idUser'] ?? 0);
 $nombreUsuario = $_SESSION['nombre'] ?? 'Usuario';
 $mensajeFlash = isset($_GET['mensaje']) ? trim((string) $_GET['mensaje']) : '';
 $errorFlash   = isset($_GET['error']) ? trim((string) $_GET['error']) : '';
+$supabaseImportSummary = $_SESSION['supabase_import_summary'] ?? null;
+if (isset($_SESSION['supabase_import_summary'])) {
+    unset($_SESSION['supabase_import_summary']);
+}
+$hasImportSummary = is_array($supabaseImportSummary);
 $canUploadBanner = in_array($nivelUsuario, [1, 2], true);
 $canPublishNews = true;
 $canGrantPermissions = ($nivelUsuario === 1);
@@ -199,6 +204,90 @@ if ($permissionConnection !== null) {
             }
         });
     }
+<?php if ($hasImportSummary): ?>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalElement = document.getElementById('supabaseImportSummaryModal');
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+    });
+<?php endif; ?>
 </script>
+<?php if ($hasImportSummary): ?>
+<div class="modal fade" id="supabaseImportSummaryModal" tabindex="-1" aria-labelledby="supabaseImportSummaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="supabaseImportSummaryModalLabel">Resumen de importación desde Supabase</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2"><strong>Procesadas:</strong> <?php echo (int) ($supabaseImportSummary['processed'] ?? 0); ?></p>
+                <p class="mb-2"><strong>Nuevas:</strong> <?php echo (int) ($supabaseImportSummary['created_news'] ?? 0); ?></p>
+                <p class="mb-3"><strong>Omitidas:</strong> <?php echo (int) ($supabaseImportSummary['skipped'] ?? 0); ?></p>
+
+                <?php $modalErrors = is_array($supabaseImportSummary['errors'] ?? null) ? $supabaseImportSummary['errors'] : []; ?>
+                <?php if (count($modalErrors) === 0): ?>
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> La importación se completó sin errores.
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Se encontraron <?php echo count($modalErrors); ?> errores durante la importación.
+                    </div>
+                    <div class="accordion" id="supabaseImportErrors">
+                        <?php foreach ($modalErrors as $index => $errorItem): ?>
+                            <?php
+                                $errorId = 'supabaseImportError' . $index;
+                                $collapseId = 'supabaseImportErrorCollapse' . $index;
+                                $recordJson = isset($errorItem['record_json']) && is_string($errorItem['record_json']) ? $errorItem['record_json'] : '';
+                                $details = isset($errorItem['details']) && is_array($errorItem['details']) ? $errorItem['details'] : [];
+                                $sql = isset($details['sql']) ? (string) $details['sql'] : '';
+                                $parameters = isset($details['parameters']) && is_array($details['parameters']) ? $details['parameters'] : [];
+                                $databaseError = isset($details['database_error']) ? (string) $details['database_error'] : '';
+                            ?>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="<?php echo htmlspecialchars($errorId, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#<?php echo htmlspecialchars($collapseId, ENT_QUOTES, 'UTF-8'); ?>" aria-expanded="false" aria-controls="<?php echo htmlspecialchars($collapseId, ENT_QUOTES, 'UTF-8'); ?>">
+                                        Error <?php echo $index + 1; ?>: <?php echo htmlspecialchars((string) ($errorItem['message'] ?? 'Error desconocido'), ENT_QUOTES, 'UTF-8'); ?>
+                                    </button>
+                                </h2>
+                                <div id="<?php echo htmlspecialchars($collapseId, ENT_QUOTES, 'UTF-8'); ?>" class="accordion-collapse collapse" aria-labelledby="<?php echo htmlspecialchars($errorId, ENT_QUOTES, 'UTF-8'); ?>" data-bs-parent="#supabaseImportErrors">
+                                    <div class="accordion-body">
+                                        <p class="mb-1"><strong>Mensaje:</strong> <?php echo htmlspecialchars((string) ($errorItem['message'] ?? 'Error desconocido'), ENT_QUOTES, 'UTF-8'); ?></p>
+                                        <?php if ($recordJson !== ''): ?>
+                                            <p class="mb-1"><strong>Registro recibido:</strong></p>
+                                            <pre class="bg-light p-3 border rounded small text-break"><?php echo htmlspecialchars($recordJson, ENT_QUOTES, 'UTF-8'); ?></pre>
+                                        <?php endif; ?>
+                                        <?php if ($sql !== ''): ?>
+                                            <p class="mb-1"><strong>SQL ejecutado:</strong></p>
+                                            <pre class="bg-light p-3 border rounded small text-break"><?php echo htmlspecialchars($sql, ENT_QUOTES, 'UTF-8'); ?></pre>
+                                        <?php endif; ?>
+                                        <?php if (!empty($parameters)): ?>
+                                            <p class="mb-1"><strong>Parámetros:</strong></p>
+                                            <pre class="bg-light p-3 border rounded small text-break"><?php echo htmlspecialchars(json_encode($parameters, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8'); ?></pre>
+                                        <?php endif; ?>
+                                        <?php if ($databaseError !== ''): ?>
+                                            <p class="mb-1"><strong>Error de la base de datos:</strong></p>
+                                            <pre class="bg-light p-3 border rounded small text-break"><?php echo htmlspecialchars($databaseError, ENT_QUOTES, 'UTF-8'); ?></pre>
+                                        <?php endif; ?>
+                                        <?php if (!empty($errorItem['error_class'])): ?>
+                                            <p class="mb-0"><strong>Tipo de error:</strong> <?php echo htmlspecialchars((string) $errorItem['error_class'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 </body>
 </html>

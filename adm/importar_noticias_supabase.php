@@ -67,6 +67,13 @@ $created   = (int) ($summary['created_news'] ?? 0);
 $skipped   = (int) ($summary['skipped'] ?? 0);
 $errors    = $summary['errors'] ?? [];
 
+$_SESSION['supabase_import_summary'] = [
+    'processed'    => $processed,
+    'created_news' => $created,
+    'skipped'      => $skipped,
+    'errors'       => $errors,
+];
+
 $mensajePartes = [
     sprintf('Importación completada. Procesadas: %d.', $processed),
     sprintf('Nuevas: %d.', $created),
