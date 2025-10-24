@@ -96,7 +96,7 @@ class SupabaseNewsIntegrator
             'title'        => (string) ($config['field_map']['title'] ?? getenv('SUPABASE_FIELD_TITLE') ?? 'title'),
             'body'         => (string) ($config['field_map']['body'] ?? getenv('SUPABASE_FIELD_BODY') ?? 'body'),
             'image'        => (string) ($config['field_map']['image'] ?? getenv('SUPABASE_FIELD_IMAGE') ?? 'image_url'),
-            'link'         => (string) ($config['field_map']['link'] ?? getenv('SUPABASE_FIELD_LINK') ?? 'link'),
+            'link'         => (string) ($config['field_map']['link'] ?? getenv('SUPABASE_FIELD_LINK') ?? 'source_url'),
             'published_at' => (string) ($config['field_map']['published_at'] ?? getenv('SUPABASE_FIELD_PUBLISHED_AT') ?? 'published_at'),
         ];
 
@@ -157,30 +157,44 @@ class SupabaseNewsIntegrator
         }
 
         $imageUrl = trim((string) ($record[$this->fieldMap['image']] ?? ''));
-        if ($imageUrl === '') {
-            throw new RuntimeException(sprintf('La noticia "%s" no incluye una URL de imagen válida.', $title));
-        }
-
         $link = trim((string) ($record[$this->fieldMap['link']] ?? ''));
         $publishedAt = $this->resolvePublishedAt($record[$this->fieldMap['published_at']] ?? null);
 
-        $needsNews   = !$this->newsExists($title, $publishedAt);
+        $needsNews   = !$this->newsExists($title, $publishedAt, $link);
         if (!$needsNews) {
             return [
                 'news_created' => false,
             ];
         }
 
-        $downloadedImage = $this->downloadImageToTemp($imageUrl);
-
-        try {
-            $newsImageName = $this->storeImageFromTemp($downloadedImage['path'], $downloadedImage['extension'], $this->newsImageDir, 'news');
-            $newsCreated   = $this->createNews($title, $body, $link, $newsImageName, $publishedAt);
-        } finally {
-            if (is_file($downloadedImage['path'])) {
-                @unlink($downloadedImage['path']);
+        $downloadedImage = null;
+        if ($imageUrl !== '') {
+            try {
+                $downloadedImage = $this->downloadImageToTemp($imageUrl);
+            } catch (Throwable $throwable) {
+                $downloadedImage = null;
             }
         }
+
+        $newsImageName = null;
+        if (is_array($downloadedImage)) {
+            try {
+                $newsImageName = $this->storeImageFromTemp(
+                    $downloadedImage['path'],
+                    $downloadedImage['extension'],
+                    $this->newsImageDir,
+                    'news'
+                );
+            } catch (Throwable $throwable) {
+                $newsImageName = null;
+            } finally {
+                if (isset($downloadedImage['path']) && is_file($downloadedImage['path'])) {
+                    @unlink($downloadedImage['path']);
+                }
+            }
+        }
+
+        $newsCreated = $this->createNews($title, $body, $link, $newsImageName, $publishedAt);
 
         return [
             'news_created' => $newsCreated,
@@ -251,28 +265,73 @@ class SupabaseNewsIntegrator
         return date('Y-m-d H:i:s');
     }
 
-    private function newsExists(string $title, string $publishedAt): bool
+    private function newsExists(string $title, string $publishedAt, string $linkValue): bool
     {
-        $link = $this->connection->GetLink();
-        $sql = 'SELECT idNoticia FROM noticias WHERE titulo = ? AND fecha = ? LIMIT 1';
+        $connection = $this->connection->GetLink();
+        $normalizedLink = trim($linkValue);
 
-        $statement = $link->prepare($sql);
+        if ($normalizedLink !== '') {
+            $sql = 'SELECT idNoticia FROM noticias WHERE enlace = ? LIMIT 1';
+            $statement = $connection->prepare($sql);
+            if ($statement === false) {
+                throw new RuntimeException('No fue posible preparar la verificación de noticias existentes por enlace.');
+            }
+
+            $statement->bind_param('s', $normalizedLink);
+            if (!$statement->execute()) {
+                $error = $statement->error;
+                $statement->close();
+                throw new RuntimeException('Error al verificar noticias existentes por enlace: ' . $error);
+            }
+
+            $statement->store_result();
+            $existsByLink = $statement->num_rows > 0;
+            $statement->close();
+
+            if ($existsByLink) {
+                return true;
+            }
+        }
+
+        $sql = 'SELECT idNoticia FROM noticias WHERE titulo = ? AND fecha = ? LIMIT 1';
+        $statement = $connection->prepare($sql);
         if ($statement === false) {
-            throw new RuntimeException('No fue posible preparar la verificación de noticias existentes.');
+            throw new RuntimeException('No fue posible preparar la verificación de noticias existentes por título y fecha.');
         }
 
         $statement->bind_param('ss', $title, $publishedAt);
         if (!$statement->execute()) {
             $error = $statement->error;
             $statement->close();
-            throw new RuntimeException('Error al verificar noticias existentes: ' . $error);
+            throw new RuntimeException('Error al verificar noticias existentes por título y fecha: ' . $error);
         }
 
         $statement->store_result();
         $exists = $statement->num_rows > 0;
         $statement->close();
 
-        return $exists;
+        if ($exists) {
+            return true;
+        }
+
+        $sql = 'SELECT idNoticia FROM noticias WHERE titulo = ? LIMIT 1';
+        $statement = $connection->prepare($sql);
+        if ($statement === false) {
+            throw new RuntimeException('No fue posible preparar la verificación de noticias existentes por título.');
+        }
+
+        $statement->bind_param('s', $title);
+        if (!$statement->execute()) {
+            $error = $statement->error;
+            $statement->close();
+            throw new RuntimeException('Error al verificar noticias existentes por título: ' . $error);
+        }
+
+        $statement->store_result();
+        $existsByTitle = $statement->num_rows > 0;
+        $statement->close();
+
+        return $existsByTitle;
     }
 
     private function createNews(string $title, string $body, string $link, ?string $imageName, string $publishedAt): bool
